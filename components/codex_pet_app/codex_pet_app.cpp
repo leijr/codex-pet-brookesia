@@ -28,7 +28,7 @@
 #define TAG "codex_pet"
 #define CANVAS_WIDTH 240
 #define CANVAS_HEIGHT 240
-#define SCREEN_BG_COLOR 0xfff7ff
+#define SCREEN_BG_COLOR 0xffffff
 
 namespace {
 
@@ -265,93 +265,58 @@ void drawLineSegment(lv_layer_t *layer, int x1, int y1, int x2, int y2, uint32_t
 
 void drawCat(lv_layer_t *layer, int x, int y, int frame, bool running)
 {
-    const uint32_t fur = 0x202733;
-    const uint32_t fur_light = 0x5c6678;
-    const uint32_t fur_dark = 0x10141b;
-    const uint32_t ink = 0x0e1117;
-    const uint32_t white = 0xf6f7f8;
-    const uint32_t blush = 0xff9aa8;
-    const uint32_t ball = 0xf59d20;
-    const uint32_t ball_light = 0xffca55;
-    const uint32_t ball_line = 0xaa5d09;
-    int roll = running ? (frame * 5) % 36 : 0;
-    int lean = running ? (int)(sinf(frame * 0.42f) * 4.0f) : 0;
-    int paw = running ? (int)(sinf(frame * 0.68f) * 4.0f) : 0;
-    int tail_wave = running ? (int)(sinf(frame * 0.58f) * 9.0f) : 0;
-    int ear_tip = running ? (int)(sinf(frame * 0.8f) * 2.0f) : 0;
+    const uint32_t body = 0x9f88ed;
+    const uint32_t foot = 0x4d3f82;
+    const uint32_t ink = 0x221b35;
+    const uint32_t white = 0xffffff;
+    const uint32_t floor_line = 0xaeb4bf;
+    const uint32_t shadow = 0xb7b7b7;
 
-    int ball_x1 = x + 55;
-    int ball_y1 = y + 77;
-    int ball_x2 = x + 151;
-    int ball_y2 = y + 173;
-    int head_x = x + 15 + lean;
-    int head_y = y + 19 - lean / 2;
-    int body_x = x + 87 + lean;
-    int body_y = y + 34 - lean / 2;
+    int bounce = running ? (int)(sinf(frame * 0.42f) * 4.0f) : 0;
+    int sway = running ? (int)(sinf(frame * 0.28f) * 3.0f) : 0;
+    int left_step = running ? (int)(sinf(frame * 1.48f) * 5.0f) : 0;
+    int right_step = running ? (int)(sinf(frame * 1.48f + 3.14159f) * 5.0f) : 0;
+    int eye_shift = running ? (int)(sinf(frame * 0.32f) * 2.0f) : 0;
 
-    drawRoundRect(layer, x + 30, y + 171, x + 171, y + 183, 0x111111, 20, LV_OPA_20);
+    int body_x = x + 30 + sway;
+    int body_y = y + 16 - bounce;
+    int body_size = 158;
+    int floor_y = y + 202;
 
-    drawRoundRect(layer, ball_x1, ball_y1, ball_x2, ball_y2, ball, 50, LV_OPA_COVER);
-    drawRoundRect(layer, x + 75, y + 88, x + 112, y + 123, ball_light, 20, LV_OPA_30);
-    drawLineSegment(layer, x + 62 + roll / 3, y + 103, x + 143 - roll / 5, y + 93, ball_line, 4);
-    drawLineSegment(layer, x + 59 + roll / 4, y + 134, x + 145 - roll / 6, y + 118, ball_line, 4);
-    drawLineSegment(layer, x + 72 + roll / 2, y + 165, x + 132 - roll / 3, y + 145, ball_line, 4);
-    drawLineSegment(layer, x + 92 - roll / 2, y + 80, x + 123 + roll / 3, y + 169, ball_line, 4);
-    drawLineSegment(layer, x + 50 + roll / 2, y + 118, x + 103 + roll / 3, y + 174, ball_line, 3);
-    drawLineSegment(layer, x + 125 - roll / 3, y + 82, x + 153 - roll / 3, y + 139, ball_line, 3);
+    drawLineSegment(layer, 0, floor_y, CANVAS_WIDTH - 1, floor_y, floor_line, 2);
+    drawRoundRect(layer, x + 105, y + 211, x + 150, y + 219, shadow, 24, LV_OPA_70);
 
-    drawRoundRect(layer, body_x, body_y, x + 174 + lean, y + 121, fur, 38, LV_OPA_COVER);
-    drawLineSegment(layer, x + 122 + lean, y + 42, x + 155 + lean, y + 82, fur_light, 5);
-    drawLineSegment(layer, x + 139 + lean, y + 43, x + 166 + lean, y + 85, fur_light, 4);
-    drawLineSegment(layer, x + 162 + lean, y + 83, x + 193, y + 64 + tail_wave, fur, 16);
-    drawLineSegment(layer, x + 193, y + 64 + tail_wave, x + 207, y + 39 + tail_wave / 2, fur, 15);
-    drawRoundRect(layer, x + 197, y + 27 + tail_wave / 2, x + 222, y + 51 + tail_wave / 2, fur_dark, 14, LV_OPA_COVER);
-    drawLineSegment(layer, x + 202, y + 33 + tail_wave / 2, x + 214, y + 28 + tail_wave / 2, fur_light, 4);
+    drawRoundRect(
+        layer,
+        body_x + 42 + left_step,
+        body_y + 122 + bounce / 2,
+        body_x + 78 + left_step,
+        body_y + 184 + bounce / 2,
+        foot,
+        20,
+        LV_OPA_COVER
+    );
+    drawRoundRect(
+        layer,
+        body_x + 114 + right_step,
+        body_y + 120 + bounce / 2,
+        body_x + 150 + right_step,
+        body_y + 176 + bounce / 2,
+        foot,
+        18,
+        LV_OPA_COVER
+    );
 
-    lv_draw_triangle_dsc_t ear;
-    lv_draw_triangle_dsc_init(&ear);
-    ear.color = lv_color_hex(fur);
-    ear.opa = LV_OPA_COVER;
-    ear.p[0] = (lv_point_precise_t){head_x + 12, head_y + 16};
-    ear.p[1] = (lv_point_precise_t){head_x + 1, head_y - 15 - ear_tip};
-    ear.p[2] = (lv_point_precise_t){head_x + 34, head_y + 11};
-    lv_draw_triangle(layer, &ear);
-    ear.p[0] = (lv_point_precise_t){head_x + 56, head_y + 10};
-    ear.p[1] = (lv_point_precise_t){head_x + 73, head_y - 17 + ear_tip};
-    ear.p[2] = (lv_point_precise_t){head_x + 83, head_y + 20};
-    lv_draw_triangle(layer, &ear);
+    drawRoundRect(layer, body_x, body_y, body_x + body_size, body_y + body_size, body, 90, LV_OPA_COVER);
 
-    ear.color = lv_color_hex(0xe2e6ef);
-    ear.p[0] = (lv_point_precise_t){head_x + 13, head_y + 10};
-    ear.p[1] = (lv_point_precise_t){head_x + 8, head_y - 3 - ear_tip};
-    ear.p[2] = (lv_point_precise_t){head_x + 29, head_y + 10};
-    lv_draw_triangle(layer, &ear);
-    ear.p[0] = (lv_point_precise_t){head_x + 62, head_y + 9};
-    ear.p[1] = (lv_point_precise_t){head_x + 71, head_y - 2 + ear_tip};
-    ear.p[2] = (lv_point_precise_t){head_x + 75, head_y + 16};
-    lv_draw_triangle(layer, &ear);
+    drawRoundRect(layer, body_x + 84, body_y + 44, body_x + 129, body_y + 94, white, 25, LV_OPA_COVER);
+    drawRoundRect(layer, body_x + 126, body_y + 38, body_x + 170, body_y + 88, white, 25, LV_OPA_COVER);
+    drawRoundRect(layer, body_x + 106 + eye_shift, body_y + 54, body_x + 127 + eye_shift, body_y + 85, 0x000000, 13, LV_OPA_COVER);
+    drawRoundRect(layer, body_x + 148 + eye_shift, body_y + 48, body_x + 169 + eye_shift, body_y + 79, 0x000000, 13, LV_OPA_COVER);
 
-    drawRoundRect(layer, head_x, head_y + 2, head_x + 84, head_y + 79, fur, 32, LV_OPA_COVER);
-    drawRoundRect(layer, head_x + 10, head_y + 12, head_x + 77, head_y + 69, 0x2c3543, 28, LV_OPA_COVER);
-    drawRoundRect(layer, head_x + 46, head_y + 48, head_x + 70, head_y + 63, white, 9, LV_OPA_COVER);
-
-    drawRoundRect(layer, head_x + 24, head_y + 27, head_x + 43, head_y + 54, white, 9, LV_OPA_COVER);
-    drawRoundRect(layer, head_x + 50, head_y + 25, head_x + 69, head_y + 52, white, 9, LV_OPA_COVER);
-    drawRoundRect(layer, head_x + 34, head_y + 38, head_x + 40, head_y + 49, ink, 4, LV_OPA_COVER);
-    drawRoundRect(layer, head_x + 55, head_y + 36, head_x + 61, head_y + 47, ink, 4, LV_OPA_COVER);
-    drawRoundRect(layer, head_x + 47, head_y + 55, head_x + 54, head_y + 61, blush, 4, LV_OPA_COVER);
-    drawRoundRect(layer, head_x + 49, head_y + 62, head_x + 62, head_y + 67, 0xf7b7c2, 5, LV_OPA_COVER);
-
-    drawLineSegment(layer, head_x + 9, head_y + 52, head_x - 14, head_y + 47, ink, 2);
-    drawLineSegment(layer, head_x + 10, head_y + 60, head_x - 12, head_y + 63, ink, 2);
-    drawLineSegment(layer, head_x + 75, head_y + 51, head_x + 99, head_y + 43, ink, 2);
-    drawLineSegment(layer, head_x + 76, head_y + 59, head_x + 101, head_y + 62, ink, 2);
-
-    drawLineSegment(layer, x + 96, y + 111, x + 137, y + 112, white, 7);
-    drawLineSegment(layer, x + 98 + lean, y + 80, x + 92, y + 132 + paw, fur_dark, 15);
-    drawRoundRect(layer, x + 84, y + 127 + paw, x + 105, y + 146 + paw, fur_dark, 11, LV_OPA_COVER);
-    drawLineSegment(layer, x + 128 + lean, y + 82, x + 123, y + 126 - paw, fur_dark, 13);
-    drawRoundRect(layer, x + 114, y + 121 - paw, x + 134, y + 139 - paw, fur_dark, 10, LV_OPA_COVER);
+    drawLineSegment(layer, body_x + 127, body_y + 105, body_x + 132, body_y + 116, ink, 3);
+    drawLineSegment(layer, body_x + 132, body_y + 116, body_x + 138, body_y + 118, ink, 3);
+    drawLineSegment(layer, body_x + 138, body_y + 118, body_x + 146, body_y + 110, ink, 3);
 }
 
 } // namespace
@@ -473,14 +438,14 @@ void CodexPetApp::drawFrame(void)
 
     PetState state = s_pet_state;
     bool running = state == PET_STATE_RUNNING;
-    int bob = running ? (int)(sinf(frame * 0.45f) * 3.0f) : 0;
-    int cat_x = running ? 16 + (int)(sinf(frame * 0.18f) * 2.0f) : 16;
+    int bob = running ? (int)(sinf(frame * 0.45f) * 2.0f) : 0;
+    int cat_x = running ? 0 + (int)(sinf(frame * 0.18f) * 2.0f) : 0;
 
     lv_layer_t layer;
     lv_canvas_init_layer(_canvas, &layer);
     lv_canvas_fill_bg(_canvas, lv_color_hex(SCREEN_BG_COLOR), LV_OPA_COVER);
 
-    drawCat(&layer, cat_x, 52 + bob, frame, running);
+    drawCat(&layer, cat_x, 18 + bob, frame, running);
 
     lv_draw_label_dsc_t label;
     lv_draw_label_dsc_init(&label);
@@ -488,7 +453,7 @@ void CodexPetApp::drawFrame(void)
     label.font = &lv_font_montserrat_24;
     label.align = LV_TEXT_ALIGN_CENTER;
     label.text = stateText(state);
-    lv_area_t label_area = {.x1 = 0, .y1 = 6, .x2 = CANVAS_WIDTH, .y2 = 34};
+    lv_area_t label_area = {.x1 = 0, .y1 = 0, .x2 = CANVAS_WIDTH, .y2 = 28};
     lv_draw_label(&layer, &label, &label_area);
 
     lv_canvas_finish_layer(_canvas, &layer);
