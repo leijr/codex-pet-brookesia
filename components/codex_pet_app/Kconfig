@@ -1,0 +1,26 @@
+menu "Codex Pet App"
+
+    config CODEX_PET_WIFI_SSID
+        string "Wi-Fi SSID"
+        default ""
+        help
+            Wi-Fi network used by the ESP32-S3 and the Mac running codex-pet.
+
+    config CODEX_PET_WIFI_PASSWORD
+        string "Wi-Fi password"
+        default ""
+        help
+            Password for the Wi-Fi network.
+
+    config CODEX_PET_BRIDGE_URL
+        string "Codex pet bridge state URL"
+        default ""
+        help
+            HTTP endpoint served by the Mac bridge. Example: http://<mac-ip>:8765/state
+
+    config CODEX_PET_POLL_INTERVAL_MS
+        int "State polling interval in milliseconds"
+        default 500
+        range 200 5000
+
+endmenu
