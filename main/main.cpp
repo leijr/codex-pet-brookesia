@@ -7,6 +7,8 @@
 #include "bsp/esp-bsp.h"
 #include "esp_brookesia.hpp"
 #include "boost/thread.hpp"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #ifdef ESP_UTILS_LOG_TAG
 #   undef ESP_UTILS_LOG_TAG
 #endif
@@ -25,6 +27,7 @@ extern "C" void app_main(void)
     ESP_UTILS_LOGI("Display ESP-Brookesia phone demo");
     ESP_UTILS_CHECK_NULL_EXIT(bsp_display_start(), "Start display failed");
     ESP_UTILS_CHECK_ERROR_EXIT(bsp_display_backlight_on(), "Turn on display backlight failed");
+    vTaskDelay(pdMS_TO_TICKS(150));
 
     /* Configure GUI lock */
     LvLock::registerCallbacks([](int timeout_ms) {

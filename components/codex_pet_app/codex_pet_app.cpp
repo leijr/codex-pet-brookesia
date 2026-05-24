@@ -470,53 +470,76 @@ void drawBallRunner(lv_layer_t *layer, int x, int y, int frame, bool running)
 {
     const uint32_t fur = 0x222733;
     const uint32_t fur_light = 0xb7bdcc;
-    const uint32_t belly = 0xd8dde8;
+    const uint32_t muzzle = 0xe9edf4;
+    const uint32_t white = 0xffffff;
+    const uint32_t ink = 0x05070a;
     const uint32_t paw = 0x141820;
-    const uint32_t ball = 0xf3c545;
+    const uint32_t ball = 0xe9a72d;
+    const uint32_t ball_light = 0xf5be45;
     const uint32_t ball_line = 0xa65d15;
-    const uint32_t floor_line = 0xaeb4bf;
-    const uint32_t shadow = 0xb7b7b7;
+    const uint32_t shadow = 0xaeb4bf;
 
     int roll = running ? frame * 6 : 0;
-    int bounce = running ? (int)(sinf(frame * 0.44f) * 4.0f) : 0;
-    int lean = running ? (int)(sinf(frame * 0.38f) * 3.0f) : 0;
-    int step = running ? (int)(sinf(frame * 1.36f) * 5.0f) : 0;
+    int bounce = running ? (int)(sinf(frame * 0.34f) * 2.0f) : 0;
+    int tail_sway = running ? (int)(sinf(frame * 0.42f) * 4.0f) : 0;
+    int paw_swing = running ? (int)(sinf(frame * 0.70f) * 2.0f) : 0;
+    int look = running ? (int)(sinf(frame * 0.24f) * 2.0f) : 0;
 
-    int floor_y = y + 218;
-    int ball_x = x + 67;
-    int ball_y = y + 104;
-    int ball_size = 106;
-    int body_x = x + 40 + lean;
-    int body_y = y + 6 - bounce;
-    int left_foot_x = ball_x + 25 + step;
-    int right_foot_x = ball_x + 62 - step;
-    int foot_y = ball_y - 3;
+    int ball_x = x + 78;
+    int ball_y = y + 111;
+    int ball_size = 96;
+    int body_x = x + 62;
+    int body_y = y + 57 - bounce;
+    int head_x = x + 20;
+    int head_y = y + 44 - bounce;
 
-    drawLineSegment(layer, 0, floor_y, LOGICAL_WIDTH - 1, floor_y, floor_line, 2);
-    drawRoundRect(layer, x + 83, y + 220, x + 162, y + 231, shadow, 24, LV_OPA_60);
+    drawRoundRect(layer, x + 70, y + 220, x + 192, y + 231, shadow, 26, LV_OPA_50);
 
     drawRoundRect(layer, ball_x, ball_y, ball_x + ball_size, ball_y + ball_size, ball, ball_size / 2, LV_OPA_COVER);
-    drawLineSegment(layer, ball_x + 12 + (roll % 18) / 3, ball_y + 37, ball_x + 91 - (roll % 18) / 5, ball_y + 25, ball_line, 4);
-    drawLineSegment(layer, ball_x + 9 + (roll % 18) / 4, ball_y + 67, ball_x + 96 - (roll % 18) / 6, ball_y + 51, ball_line, 4);
-    drawLineSegment(layer, ball_x + 38 - (roll % 18) / 2, ball_y + 5, ball_x + 62 + (roll % 18) / 3, ball_y + 99, ball_line, 4);
+    drawRoundRect(layer, ball_x + 7, ball_y + 7, ball_x + 49, ball_y + 51, ball_light, 28, LV_OPA_40);
+    drawLineSegment(layer, ball_x + 6 + (roll % 12) / 3, ball_y + 35, ball_x + 86 - (roll % 12) / 4, ball_y + 22, ball_line, 3);
+    drawLineSegment(layer, ball_x + 4 + (roll % 12) / 4, ball_y + 64, ball_x + 90 - (roll % 12) / 5, ball_y + 49, ball_line, 3);
+    drawLineSegment(layer, ball_x + 40 - (roll % 12) / 2, ball_y + 5, ball_x + 62 + (roll % 12) / 3, ball_y + 91, ball_line, 3);
+    drawLineSegment(layer, ball_x + 85, ball_y + 22, ball_x + 76, ball_y + 76, ball_line, 3);
+    drawLineSegment(layer, ball_x + 5, ball_y + 35, ball_x + 41, ball_y + 95, ball_line, 2);
 
-    drawLineSegment(layer, body_x + 19, body_y + 119, body_x - 8, body_y + 150, fur, 28);
-    drawRoundRect(layer, body_x - 13, body_y + 135, body_x + 39, body_y + 182, fur, 25, LV_OPA_COVER);
-    drawLineSegment(layer, body_x + 29, body_y + 128, body_x + 1, body_y + 148, fur_light, 5);
+    drawLineSegment(layer, body_x + 112, body_y + 26, body_x + 150, body_y - 6 + tail_sway, fur, 22);
+    drawLineSegment(layer, body_x + 147, body_y - 7 + tail_sway, body_x + 138, body_y - 28 + tail_sway, fur, 18);
+    drawLineSegment(layer, body_x + 138, body_y - 28 + tail_sway, body_x + 151, body_y - 44 + tail_sway, fur, 14);
+    drawLineSegment(layer, body_x + 140, body_y - 24 + tail_sway, body_x + 149, body_y - 37 + tail_sway, fur_light, 8);
+    drawLineSegment(layer, body_x + 132, body_y - 3 + tail_sway, body_x + 145, body_y - 15 + tail_sway, fur_light, 7);
 
-    drawRoundRect(layer, body_x + 36, body_y + 76, body_x + 148, body_y + 176, fur, 56, LV_OPA_COVER);
-    drawRoundRect(layer, body_x + 72, body_y + 115, body_x + 136, body_y + 174, belly, 33, LV_OPA_COVER);
-    drawLineSegment(layer, body_x + 50, body_y + 112, body_x + 16, body_y + 144, fur, 18);
-    drawRoundRect(layer, body_x + 6, body_y + 137, body_x + 27, body_y + 158, paw, 10, LV_OPA_COVER);
-    drawLineSegment(layer, body_x + 137, body_y + 112, body_x + 167, body_y + 142, fur, 18);
-    drawRoundRect(layer, body_x + 158, body_y + 136, body_x + 180, body_y + 158, paw, 10, LV_OPA_COVER);
+    drawRoundRect(layer, body_x + 6, body_y + 1, body_x + 119, body_y + 72, fur, 40, LV_OPA_COVER);
+    drawRoundRect(layer, body_x + 48, body_y + 4, body_x + 127, body_y + 78, fur, 38, LV_OPA_COVER);
+    drawLineSegment(layer, body_x + 16, body_y + 52, body_x + 68, body_y + 82, muzzle, 9);
+    drawLineSegment(layer, body_x + 82, body_y + 6, body_x + 103, body_y + 35, fur_light, 4);
+    drawLineSegment(layer, body_x + 102, body_y + 9, body_x + 119, body_y + 40, fur_light, 4);
+    drawLineSegment(layer, body_x + 77, body_y + 16, body_x + 80, body_y + 46, ink, 2);
+    drawLineSegment(layer, body_x + 94, body_y + 20, body_x + 98, body_y + 49, ink, 2);
 
-    drawCatHead(layer, body_x + 19, body_y - 12, frame, running);
+    drawLineSegment(layer, body_x + 50, body_y + 52, ball_x + 86, ball_y + 22 + paw_swing, fur, 17);
+    drawRoundRect(layer, ball_x + 76, ball_y + 17 + paw_swing, ball_x + 97, ball_y + 37 + paw_swing, paw, 10, LV_OPA_COVER);
+    drawLineSegment(layer, body_x + 118, body_y + 48, ball_x + 100, ball_y + 72, fur, 18);
+    drawRoundRect(layer, ball_x + 91, ball_y + 66, ball_x + 112, ball_y + 89, paw, 10, LV_OPA_COVER);
 
-    drawLineSegment(layer, body_x + 54, body_y + 126, left_foot_x + 13, foot_y + 11, paw, 11);
-    drawLineSegment(layer, body_x + 100, body_y + 126, right_foot_x + 13, foot_y + 11, paw, 11);
-    drawRoundRect(layer, left_foot_x, foot_y, left_foot_x + 30, foot_y + 18, paw, 10, LV_OPA_COVER);
-    drawRoundRect(layer, right_foot_x, foot_y - 1, right_foot_x + 30, foot_y + 17, paw, 10, LV_OPA_COVER);
+    drawTriangle(layer, head_x + 12, head_y + 20, head_x + 4, head_y - 21, head_x + 45, head_y + 9, fur, LV_OPA_COVER);
+    drawTriangle(layer, head_x + 69, head_y + 15, head_x + 98, head_y - 34, head_x + 104, head_y + 26, fur, LV_OPA_COVER);
+    drawTriangle(layer, head_x + 22, head_y + 12, head_x + 13, head_y - 12, head_x + 39, head_y + 9, fur_light, LV_OPA_70);
+    drawTriangle(layer, head_x + 78, head_y + 11, head_x + 94, head_y - 17, head_x + 96, head_y + 19, fur_light, LV_OPA_70);
+
+    drawRoundRect(layer, head_x, head_y, head_x + 96, head_y + 65, fur, 34, LV_OPA_COVER);
+    drawRoundRect(layer, head_x + 25, head_y + 32, head_x + 71, head_y + 64, muzzle, 18, LV_OPA_COVER);
+    drawRoundRect(layer, head_x + 31, head_y + 15, head_x + 51, head_y + 43, white, 10, LV_OPA_COVER);
+    drawRoundRect(layer, head_x + 60, head_y + 13, head_x + 82, head_y + 42, white, 10, LV_OPA_COVER);
+    drawRoundRect(layer, head_x + 40 + look, head_y + 22, head_x + 47 + look, head_y + 35, ink, 4, LV_OPA_COVER);
+    drawRoundRect(layer, head_x + 69 + look, head_y + 20, head_x + 76 + look, head_y + 34, ink, 4, LV_OPA_COVER);
+    drawRoundRect(layer, head_x + 49, head_y + 40, head_x + 60, head_y + 48, ink, 5, LV_OPA_COVER);
+    drawLineSegment(layer, head_x + 54, head_y + 47, head_x + 44, head_y + 55, ink, 2);
+    drawLineSegment(layer, head_x + 54, head_y + 47, head_x + 66, head_y + 55, ink, 2);
+    drawLineSegment(layer, head_x + 14, head_y + 37, head_x - 16, head_y + 31, ink, 2);
+    drawLineSegment(layer, head_x + 16, head_y + 48, head_x - 15, head_y + 50, ink, 2);
+    drawLineSegment(layer, head_x + 80, head_y + 36, head_x + 111, head_y + 30, ink, 2);
+    drawLineSegment(layer, head_x + 79, head_y + 47, head_x + 110, head_y + 50, ink, 2);
 }
 
 void drawPatternDots(lv_layer_t *layer, int selected)
@@ -700,7 +723,7 @@ void CodexPetApp::drawFrame(void)
     label.font = &lv_font_montserrat_24;
     label.align = LV_TEXT_ALIGN_CENTER;
     label.text = stateText(state);
-    drawLabelArea(&layer, &label, 0, -6, LOGICAL_WIDTH, 22);
+    drawLabelArea(&layer, &label, 0, 3, LOGICAL_WIDTH, 31);
 
     lv_canvas_finish_layer(_canvas, &layer);
     frame++;
