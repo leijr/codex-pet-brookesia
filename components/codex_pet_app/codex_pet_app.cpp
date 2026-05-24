@@ -26,9 +26,12 @@
 
 #define APP_NAME "Codex Pet"
 #define TAG "codex_pet"
-#define CANVAS_WIDTH 240
-#define CANVAS_HEIGHT 240
+#define LOGICAL_WIDTH 240
+#define LOGICAL_HEIGHT 240
+#define CANVAS_WIDTH 360
+#define CANVAS_HEIGHT 360
 #define SCREEN_BG_COLOR 0xffffff
+#define SKY_BG_COLOR 0x87ceeb
 
 namespace {
 
@@ -59,6 +62,31 @@ bool s_wifi_started = false;
 bool s_poll_task_started = false;
 
 constexpr int WIFI_CONNECTED_BIT = BIT0;
+
+int scaleAxis(int value, int logical_size, int canvas_size)
+{
+    int half = logical_size / 2;
+    return (value * canvas_size + (value >= 0 ? half : -half)) / logical_size;
+}
+
+int scaleX(int value)
+{
+    return scaleAxis(value, LOGICAL_WIDTH, CANVAS_WIDTH);
+}
+
+int scaleY(int value)
+{
+    return scaleAxis(value, LOGICAL_HEIGHT, CANVAS_HEIGHT);
+}
+
+int scaleLen(int value)
+{
+    if (value <= 0) {
+        return value;
+    }
+    int scaled = (value * CANVAS_WIDTH + LOGICAL_WIDTH / 2) / LOGICAL_WIDTH;
+    return scaled > 0 ? scaled : 1;
+}
 
 const char *stateText(PetState state)
 {
@@ -252,8 +280,13 @@ void drawRoundRect(lv_layer_t *layer, int x1, int y1, int x2, int y2, uint32_t c
     lv_draw_rect_dsc_init(&rect);
     rect.bg_color = lv_color_hex(color);
     rect.bg_opa = opa;
-    rect.radius = radius;
-    lv_area_t area = {.x1 = x1, .y1 = y1, .x2 = x2, .y2 = y2};
+    rect.radius = scaleLen(radius);
+    lv_area_t area = {
+        .x1 = scaleX(x1),
+        .y1 = scaleY(y1),
+        .x2 = scaleX(x2),
+        .y2 = scaleY(y2),
+    };
     lv_draw_rect(layer, &rect, &area);
 }
 
@@ -262,11 +295,11 @@ void drawLineSegment(lv_layer_t *layer, int x1, int y1, int x2, int y2, uint32_t
     lv_draw_line_dsc_t line;
     lv_draw_line_dsc_init(&line);
     line.color = lv_color_hex(color);
-    line.width = width;
+    line.width = scaleLen(width);
     line.round_start = 1;
     line.round_end = 1;
-    line.p1 = (lv_point_precise_t){x1, y1};
-    line.p2 = (lv_point_precise_t){x2, y2};
+    line.p1 = (lv_point_precise_t){scaleX(x1), scaleY(y1)};
+    line.p2 = (lv_point_precise_t){scaleX(x2), scaleY(y2)};
     lv_draw_line(layer, &line);
 }
 
@@ -276,10 +309,21 @@ void drawTriangle(lv_layer_t *layer, int x1, int y1, int x2, int y2, int x3, int
     lv_draw_triangle_dsc_init(&tri);
     tri.color = lv_color_hex(color);
     tri.opa = opa;
-    tri.p[0] = (lv_point_precise_t){x1, y1};
-    tri.p[1] = (lv_point_precise_t){x2, y2};
-    tri.p[2] = (lv_point_precise_t){x3, y3};
+    tri.p[0] = (lv_point_precise_t){scaleX(x1), scaleY(y1)};
+    tri.p[1] = (lv_point_precise_t){scaleX(x2), scaleY(y2)};
+    tri.p[2] = (lv_point_precise_t){scaleX(x3), scaleY(y3)};
     lv_draw_triangle(layer, &tri);
+}
+
+void drawLabelArea(lv_layer_t *layer, lv_draw_label_dsc_t *label, int x1, int y1, int x2, int y2)
+{
+    lv_area_t area = {
+        .x1 = scaleX(x1),
+        .y1 = scaleY(y1),
+        .x2 = scaleX(x2),
+        .y2 = scaleY(y2),
+    };
+    lv_draw_label(layer, label, &area);
 }
 
 void drawPurplePet(lv_layer_t *layer, int x, int y, int frame, bool running)
@@ -302,7 +346,7 @@ void drawPurplePet(lv_layer_t *layer, int x, int y, int frame, bool running)
     int body_size = 158;
     int floor_y = y + 202;
 
-    drawLineSegment(layer, 0, floor_y, CANVAS_WIDTH - 1, floor_y, floor_line, 2);
+    drawLineSegment(layer, 0, floor_y, LOGICAL_WIDTH - 1, floor_y, floor_line, 2);
     drawRoundRect(layer, x + 105, y + 211, x + 150, y + 219, shadow, 24, LV_OPA_70);
 
     drawRoundRect(
@@ -429,8 +473,7 @@ void drawCatGuitar(lv_layer_t *layer, int x, int y, int frame, bool running)
     label.font = &lv_font_montserrat_20;
     label.align = LV_TEXT_ALIGN_CENTER;
     label.text = "吉他";
-    lv_area_t label_area = {.x1 = x + 66, .y1 = y + 199, .x2 = x + 115, .y2 = y + 224};
-    lv_draw_label(layer, &label, &label_area);
+    drawLabelArea(layer, &label, x + 66, y + 199, x + 115, y + 224);
 }
 
 void drawBallRunner(lv_layer_t *layer, int x, int y, int frame, bool running)
@@ -447,26 +490,30 @@ void drawBallRunner(lv_layer_t *layer, int x, int y, int frame, bool running)
     int roll = running ? frame * 6 : 0;
     int bounce = running ? (int)(sinf(frame * 0.44f) * 4.0f) : 0;
     int lean = running ? (int)(sinf(frame * 0.38f) * 3.0f) : 0;
-    int step = running ? (int)(sinf(frame * 1.36f) * 7.0f) : 0;
+    int step = running ? (int)(sinf(frame * 1.36f) * 5.0f) : 0;
 
-    int floor_y = y + 205;
-    int ball_x = x + 77;
-    int ball_y = y + 123;
-    int body_x = x + 43 + lean;
-    int body_y = y + 25 - bounce;
+    int floor_y = y + 214;
+    int ball_x = x + 63;
+    int ball_y = y + 112;
+    int ball_size = 116;
+    int body_x = x + 40 + lean;
+    int body_y = y + 13 - bounce;
+    int left_foot_x = ball_x + 28 + step;
+    int right_foot_x = ball_x + 68 - step;
+    int foot_y = ball_y + 2;
 
-    drawLineSegment(layer, 0, floor_y, CANVAS_WIDTH - 1, floor_y, floor_line, 2);
-    drawRoundRect(layer, x + 91, y + 216, x + 150, y + 224, shadow, 24, LV_OPA_60);
+    drawLineSegment(layer, 0, floor_y, LOGICAL_WIDTH - 1, floor_y, floor_line, 2);
+    drawRoundRect(layer, x + 83, y + 220, x + 162, y + 231, shadow, 24, LV_OPA_60);
 
-    drawRoundRect(layer, ball_x, ball_y, ball_x + 96, ball_y + 96, ball, 48, LV_OPA_COVER);
-    drawLineSegment(layer, ball_x + 12 + (roll % 18) / 3, ball_y + 34, ball_x + 82 - (roll % 18) / 5, ball_y + 24, ball_line, 4);
-    drawLineSegment(layer, ball_x + 8 + (roll % 18) / 4, ball_y + 63, ball_x + 87 - (roll % 18) / 6, ball_y + 47, ball_line, 4);
-    drawLineSegment(layer, ball_x + 34 - (roll % 18) / 2, ball_y + 4, ball_x + 58 + (roll % 18) / 3, ball_y + 92, ball_line, 4);
+    drawRoundRect(layer, ball_x, ball_y, ball_x + ball_size, ball_y + ball_size, ball, ball_size / 2, LV_OPA_COVER);
+    drawLineSegment(layer, ball_x + 13 + (roll % 18) / 3, ball_y + 40, ball_x + 100 - (roll % 18) / 5, ball_y + 27, ball_line, 4);
+    drawLineSegment(layer, ball_x + 10 + (roll % 18) / 4, ball_y + 74, ball_x + 106 - (roll % 18) / 6, ball_y + 55, ball_line, 4);
+    drawLineSegment(layer, ball_x + 41 - (roll % 18) / 2, ball_y + 5, ball_x + 68 + (roll % 18) / 3, ball_y + 110, ball_line, 4);
 
-    drawLineSegment(layer, body_x + 59, body_y + 144, ball_x + 30 + step, ball_y + 17, paw, 11);
-    drawLineSegment(layer, body_x + 98, body_y + 142, ball_x + 66 - step, ball_y + 16, paw, 11);
-    drawRoundRect(layer, ball_x + 17 + step, ball_y + 7, ball_x + 44 + step, ball_y + 26, paw, 10, LV_OPA_COVER);
-    drawRoundRect(layer, ball_x + 55 - step, ball_y + 6, ball_x + 82 - step, ball_y + 25, paw, 10, LV_OPA_COVER);
+    drawLineSegment(layer, body_x + 59, body_y + 144, left_foot_x + 13, foot_y + 10, paw, 11);
+    drawLineSegment(layer, body_x + 98, body_y + 142, right_foot_x + 13, foot_y + 10, paw, 11);
+    drawRoundRect(layer, left_foot_x, foot_y, left_foot_x + 29, foot_y + 19, paw, 10, LV_OPA_COVER);
+    drawRoundRect(layer, right_foot_x, foot_y - 1, right_foot_x + 29, foot_y + 18, paw, 10, LV_OPA_COVER);
 
     drawLineSegment(layer, body_x + 19, body_y + 119, body_x - 8, body_y + 150, fur, 28);
     drawRoundRect(layer, body_x - 13, body_y + 135, body_x + 39, body_y + 182, fur, 25, LV_OPA_COVER);
@@ -640,7 +687,12 @@ void CodexPetApp::drawFrame(void)
 
     lv_layer_t layer;
     lv_canvas_init_layer(_canvas, &layer);
-    uint32_t bg = _pattern_index == PET_PATTERN_PURPLE ? SCREEN_BG_COLOR : 0xdfe8f8;
+    uint32_t bg = _pattern_index == PET_PATTERN_PURPLE ? SCREEN_BG_COLOR : SKY_BG_COLOR;
+    lv_obj_t *screen = lv_screen_active();
+    if (screen != nullptr) {
+        lv_obj_set_style_bg_color(screen, lv_color_hex(bg), LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, LV_PART_MAIN);
+    }
     lv_canvas_fill_bg(_canvas, lv_color_hex(bg), LV_OPA_COVER);
 
     if (_pattern_index == PET_PATTERN_BALL) {
@@ -658,8 +710,7 @@ void CodexPetApp::drawFrame(void)
     label.font = &lv_font_montserrat_24;
     label.align = LV_TEXT_ALIGN_CENTER;
     label.text = stateText(state);
-    lv_area_t label_area = {.x1 = 0, .y1 = -6, .x2 = CANVAS_WIDTH, .y2 = 22};
-    lv_draw_label(&layer, &label, &label_area);
+    drawLabelArea(&layer, &label, 0, -6, LOGICAL_WIDTH, 22);
 
     lv_canvas_finish_layer(_canvas, &layer);
     frame++;
