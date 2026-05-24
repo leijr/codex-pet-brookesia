@@ -28,8 +28,8 @@
 #define TAG "codex_pet"
 #define LOGICAL_WIDTH 240
 #define LOGICAL_HEIGHT 240
-#define CANVAS_WIDTH 360
-#define CANVAS_HEIGHT 360
+#define CANVAS_WIDTH 288
+#define CANVAS_HEIGHT 288
 #define SCREEN_BG_COLOR 0xffffff
 #define SKY_BG_COLOR 0x87ceeb
 
@@ -464,16 +464,6 @@ void drawCatGuitar(lv_layer_t *layer, int x, int y, int frame, bool running)
     drawRoundRect(layer, cat_x + 146, cat_y + 160 + strum / 2, cat_x + 165, cat_y + 181 + strum / 2, paw, 10, LV_OPA_COVER);
 
     drawCatHead(layer, cat_x + 21, cat_y + 0, frame, running);
-
-    drawRoundRect(layer, x + 66, y + 194, x + 115, y + 228, 0xf4f6f8, 2, LV_OPA_COVER);
-    drawLineSegment(layer, x + 66, y + 194, x + 115, y + 194, 0x999999, 1);
-    lv_draw_label_dsc_t label;
-    lv_draw_label_dsc_init(&label);
-    label.color = lv_color_hex(0x333333);
-    label.font = &lv_font_montserrat_20;
-    label.align = LV_TEXT_ALIGN_CENTER;
-    label.text = "吉他";
-    drawLabelArea(layer, &label, x + 66, y + 199, x + 115, y + 224);
 }
 
 void drawBallRunner(lv_layer_t *layer, int x, int y, int frame, bool running)
@@ -492,28 +482,23 @@ void drawBallRunner(lv_layer_t *layer, int x, int y, int frame, bool running)
     int lean = running ? (int)(sinf(frame * 0.38f) * 3.0f) : 0;
     int step = running ? (int)(sinf(frame * 1.36f) * 5.0f) : 0;
 
-    int floor_y = y + 214;
-    int ball_x = x + 63;
-    int ball_y = y + 112;
-    int ball_size = 116;
+    int floor_y = y + 218;
+    int ball_x = x + 67;
+    int ball_y = y + 104;
+    int ball_size = 106;
     int body_x = x + 40 + lean;
-    int body_y = y + 13 - bounce;
-    int left_foot_x = ball_x + 28 + step;
-    int right_foot_x = ball_x + 68 - step;
-    int foot_y = ball_y + 2;
+    int body_y = y + 6 - bounce;
+    int left_foot_x = ball_x + 25 + step;
+    int right_foot_x = ball_x + 62 - step;
+    int foot_y = ball_y - 3;
 
     drawLineSegment(layer, 0, floor_y, LOGICAL_WIDTH - 1, floor_y, floor_line, 2);
     drawRoundRect(layer, x + 83, y + 220, x + 162, y + 231, shadow, 24, LV_OPA_60);
 
     drawRoundRect(layer, ball_x, ball_y, ball_x + ball_size, ball_y + ball_size, ball, ball_size / 2, LV_OPA_COVER);
-    drawLineSegment(layer, ball_x + 13 + (roll % 18) / 3, ball_y + 40, ball_x + 100 - (roll % 18) / 5, ball_y + 27, ball_line, 4);
-    drawLineSegment(layer, ball_x + 10 + (roll % 18) / 4, ball_y + 74, ball_x + 106 - (roll % 18) / 6, ball_y + 55, ball_line, 4);
-    drawLineSegment(layer, ball_x + 41 - (roll % 18) / 2, ball_y + 5, ball_x + 68 + (roll % 18) / 3, ball_y + 110, ball_line, 4);
-
-    drawLineSegment(layer, body_x + 59, body_y + 144, left_foot_x + 13, foot_y + 10, paw, 11);
-    drawLineSegment(layer, body_x + 98, body_y + 142, right_foot_x + 13, foot_y + 10, paw, 11);
-    drawRoundRect(layer, left_foot_x, foot_y, left_foot_x + 29, foot_y + 19, paw, 10, LV_OPA_COVER);
-    drawRoundRect(layer, right_foot_x, foot_y - 1, right_foot_x + 29, foot_y + 18, paw, 10, LV_OPA_COVER);
+    drawLineSegment(layer, ball_x + 12 + (roll % 18) / 3, ball_y + 37, ball_x + 91 - (roll % 18) / 5, ball_y + 25, ball_line, 4);
+    drawLineSegment(layer, ball_x + 9 + (roll % 18) / 4, ball_y + 67, ball_x + 96 - (roll % 18) / 6, ball_y + 51, ball_line, 4);
+    drawLineSegment(layer, ball_x + 38 - (roll % 18) / 2, ball_y + 5, ball_x + 62 + (roll % 18) / 3, ball_y + 99, ball_line, 4);
 
     drawLineSegment(layer, body_x + 19, body_y + 119, body_x - 8, body_y + 150, fur, 28);
     drawRoundRect(layer, body_x - 13, body_y + 135, body_x + 39, body_y + 182, fur, 25, LV_OPA_COVER);
@@ -527,6 +512,11 @@ void drawBallRunner(lv_layer_t *layer, int x, int y, int frame, bool running)
     drawRoundRect(layer, body_x + 158, body_y + 136, body_x + 180, body_y + 158, paw, 10, LV_OPA_COVER);
 
     drawCatHead(layer, body_x + 19, body_y - 12, frame, running);
+
+    drawLineSegment(layer, body_x + 54, body_y + 126, left_foot_x + 13, foot_y + 11, paw, 11);
+    drawLineSegment(layer, body_x + 100, body_y + 126, right_foot_x + 13, foot_y + 11, paw, 11);
+    drawRoundRect(layer, left_foot_x, foot_y, left_foot_x + 30, foot_y + 18, paw, 10, LV_OPA_COVER);
+    drawRoundRect(layer, right_foot_x, foot_y - 1, right_foot_x + 30, foot_y + 17, paw, 10, LV_OPA_COVER);
 }
 
 void drawPatternDots(lv_layer_t *layer, int selected)
