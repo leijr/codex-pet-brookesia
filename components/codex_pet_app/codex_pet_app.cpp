@@ -40,7 +40,8 @@ enum PetState {
 };
 
 enum PetPattern {
-    PET_PATTERN_GUITAR = 0,
+    PET_PATTERN_PURPLE = 0,
+    PET_PATTERN_GUITAR,
     PET_PATTERN_BALL,
     PET_PATTERN_COUNT,
 };
@@ -269,23 +270,31 @@ void drawLineSegment(lv_layer_t *layer, int x1, int y1, int x2, int y2, uint32_t
     lv_draw_line(layer, &line);
 }
 
-void drawGuitarPet(lv_layer_t *layer, int x, int y, int frame, bool running)
+void drawTriangle(lv_layer_t *layer, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color, lv_opa_t opa)
+{
+    lv_draw_triangle_dsc_t tri;
+    lv_draw_triangle_dsc_init(&tri);
+    tri.color = lv_color_hex(color);
+    tri.opa = opa;
+    tri.p[0] = (lv_point_precise_t){x1, y1};
+    tri.p[1] = (lv_point_precise_t){x2, y2};
+    tri.p[2] = (lv_point_precise_t){x3, y3};
+    lv_draw_triangle(layer, &tri);
+}
+
+void drawPurplePet(lv_layer_t *layer, int x, int y, int frame, bool running)
 {
     const uint32_t body = 0x9f88ed;
     const uint32_t foot = 0x4d3f82;
     const uint32_t ink = 0x221b35;
     const uint32_t white = 0xffffff;
-    const uint32_t guitar = 0xd88937;
-    const uint32_t guitar_dark = 0x7b4a22;
-    const uint32_t guitar_light = 0xf4bc60;
     const uint32_t floor_line = 0xaeb4bf;
     const uint32_t shadow = 0xb7b7b7;
 
-    int bounce = running ? (int)(sinf(frame * 0.34f) * 3.0f) : 0;
-    int sway = running ? (int)(sinf(frame * 0.22f) * 2.0f) : 0;
-    int strum = running ? (int)(sinf(frame * 0.92f) * 12.0f) : 0;
-    int left_step = running ? (int)(sinf(frame * 0.44f) * 2.0f) : 0;
-    int right_step = running ? (int)(sinf(frame * 0.44f + 3.14159f) * 2.0f) : 0;
+    int bounce = running ? (int)(sinf(frame * 0.42f) * 4.0f) : 0;
+    int sway = running ? (int)(sinf(frame * 0.28f) * 3.0f) : 0;
+    int left_step = running ? (int)(sinf(frame * 1.48f) * 5.0f) : 0;
+    int right_step = running ? (int)(sinf(frame * 1.48f + 3.14159f) * 5.0f) : 0;
     int eye_shift = running ? (int)(sinf(frame * 0.32f) * 2.0f) : 0;
 
     int body_x = x + 30 + sway;
@@ -317,10 +326,6 @@ void drawGuitarPet(lv_layer_t *layer, int x, int y, int frame, bool running)
         LV_OPA_COVER
     );
 
-    drawLineSegment(layer, body_x + 148, body_y + 116, body_x + 208, body_y + 74, guitar_dark, 10);
-    drawLineSegment(layer, body_x + 146, body_y + 113, body_x + 206, body_y + 71, guitar_light, 3);
-    drawRoundRect(layer, body_x + 198, body_y + 62, body_x + 225, body_y + 80, guitar_dark, 8, LV_OPA_COVER);
-
     drawRoundRect(layer, body_x, body_y, body_x + body_size, body_y + body_size, body, 90, LV_OPA_COVER);
 
     drawRoundRect(layer, body_x + 84, body_y + 44, body_x + 129, body_y + 94, white, 25, LV_OPA_COVER);
@@ -331,28 +336,110 @@ void drawGuitarPet(lv_layer_t *layer, int x, int y, int frame, bool running)
     drawLineSegment(layer, body_x + 127, body_y + 105, body_x + 132, body_y + 116, ink, 3);
     drawLineSegment(layer, body_x + 132, body_y + 116, body_x + 138, body_y + 118, ink, 3);
     drawLineSegment(layer, body_x + 138, body_y + 118, body_x + 146, body_y + 110, ink, 3);
+}
 
-    drawRoundRect(layer, body_x + 76, body_y + 118, body_x + 150, body_y + 176, guitar, 30, LV_OPA_COVER);
-    drawRoundRect(layer, body_x + 89, body_y + 128, body_x + 136, body_y + 165, guitar_light, 24, LV_OPA_40);
-    drawRoundRect(layer, body_x + 107, body_y + 135, body_x + 125, body_y + 153, 0x2b1a13, 10, LV_OPA_COVER);
-    drawLineSegment(layer, body_x + 80, body_y + 135, body_x + 210, body_y + 75, 0xf8e6bd, 2);
-    drawLineSegment(layer, body_x + 81, body_y + 144, body_x + 210, body_y + 78, 0xf8e6bd, 2);
-    drawLineSegment(layer, body_x + 82, body_y + 153, body_x + 211, body_y + 81, 0xf8e6bd, 2);
+void drawCatHead(lv_layer_t *layer, int x, int y, int frame, bool running)
+{
+    const uint32_t fur = 0x222733;
+    const uint32_t fur_light = 0xb7bdcc;
+    const uint32_t muzzle = 0xe9edf4;
+    const uint32_t white = 0xffffff;
+    const uint32_t ink = 0x05070a;
+    const uint32_t tongue = 0xff7e88;
+    int look = running ? (int)(sinf(frame * 0.24f) * 2.0f) : 0;
 
-    drawLineSegment(layer, body_x + 45, body_y + 112, body_x + 92, body_y + 140 + strum / 3, foot, 13);
-    drawRoundRect(layer, body_x + 88, body_y + 134 + strum / 3, body_x + 109, body_y + 154 + strum / 3, foot, 11, LV_OPA_COVER);
-    drawLineSegment(layer, body_x + 140, body_y + 108, body_x + 178, body_y + 93, foot, 12);
-    drawRoundRect(layer, body_x + 173, body_y + 86, body_x + 192, body_y + 105, foot, 10, LV_OPA_COVER);
+    drawTriangle(layer, x + 14, y + 28, x + 31, y - 21, x + 45, y + 31, fur, LV_OPA_COVER);
+    drawTriangle(layer, x + 106, y + 30, x + 147, y + 1, x + 128, y + 53, fur, LV_OPA_COVER);
+    drawTriangle(layer, x + 24, y + 20, x + 32, y - 9, x + 41, y + 26, fur_light, LV_OPA_70);
+    drawTriangle(layer, x + 116, y + 28, x + 138, y + 10, x + 126, y + 43, fur_light, LV_OPA_70);
+
+    drawRoundRect(layer, x, y + 18, x + 142, y + 109, fur, 54, LV_OPA_COVER);
+    drawRoundRect(layer, x + 27, y + 57, x + 88, y + 109, 0x2e3542, 36, LV_OPA_COVER);
+    drawRoundRect(layer, x + 61, y + 72, x + 96, y + 101, muzzle, 16, LV_OPA_COVER);
+
+    drawRoundRect(layer, x + 44, y + 47, x + 78, y + 78, white, 15, LV_OPA_COVER);
+    drawRoundRect(layer, x + 85, y + 49, x + 119, y + 80, white, 15, LV_OPA_COVER);
+    drawRoundRect(layer, x + 62 + look, y + 59, x + 70 + look, y + 72, ink, 5, LV_OPA_COVER);
+    drawRoundRect(layer, x + 101 + look, y + 61, x + 109 + look, y + 74, ink, 5, LV_OPA_COVER);
+
+    drawRoundRect(layer, x + 76, y + 78, x + 86, y + 86, ink, 5, LV_OPA_COVER);
+    drawLineSegment(layer, x + 81, y + 85, x + 74, y + 93, ink, 2);
+    drawLineSegment(layer, x + 81, y + 85, x + 90, y + 94, ink, 2);
+    drawRoundRect(layer, x + 77, y + 92, x + 88, y + 106, tongue, 7, LV_OPA_COVER);
+
+    drawLineSegment(layer, x + 16, y + 72, x - 15, y + 64, ink, 2);
+    drawLineSegment(layer, x + 19, y + 84, x - 15, y + 86, ink, 2);
+    drawLineSegment(layer, x + 119, y + 73, x + 153, y + 64, ink, 2);
+    drawLineSegment(layer, x + 116, y + 85, x + 151, y + 87, ink, 2);
+}
+
+void drawCatGuitar(lv_layer_t *layer, int x, int y, int frame, bool running)
+{
+    const uint32_t fur = 0x222733;
+    const uint32_t fur_light = 0xb7bdcc;
+    const uint32_t belly = 0xd8dde8;
+    const uint32_t paw = 0x141820;
+    const uint32_t guitar = 0xf3c545;
+    const uint32_t guitar_dark = 0xea7e25;
+    const uint32_t guitar_light = 0xffdf72;
+    const uint32_t string = 0xfff4cf;
+    const uint32_t shadow = 0xb0b7c4;
+    int strum = running ? (int)(sinf(frame * 0.95f) * 10.0f) : 0;
+    int bob = running ? (int)(sinf(frame * 0.30f) * 2.0f) : 0;
+
+    int cat_x = x + 18;
+    int cat_y = y + 18 + bob;
+    drawRoundRect(layer, x + 52, y + 209, x + 165, y + 222, shadow, 24, LV_OPA_50);
+
+    drawLineSegment(layer, cat_x + 30, cat_y + 123, cat_x + 4, cat_y + 154, fur, 30);
+    drawRoundRect(layer, cat_x - 2, cat_y + 140, cat_x + 45, cat_y + 188, fur, 24, LV_OPA_COVER);
+    drawLineSegment(layer, cat_x + 39, cat_y + 132, cat_x + 10, cat_y + 151, fur_light, 5);
+    drawRoundRect(layer, cat_x + 39, cat_y + 151, cat_x + 68, cat_y + 178, paw, 14, LV_OPA_COVER);
+    drawRoundRect(layer, cat_x + 62, cat_y + 163, cat_x + 94, cat_y + 196, paw, 16, LV_OPA_COVER);
+    drawRoundRect(layer, cat_x + 68, cat_y + 172, cat_x + 91, cat_y + 194, 0x303743, 12, LV_OPA_COVER);
+
+    drawRoundRect(layer, cat_x + 43, cat_y + 83, cat_x + 151, cat_y + 189, fur, 56, LV_OPA_COVER);
+    drawRoundRect(layer, cat_x + 75, cat_y + 118, cat_x + 137, cat_y + 183, belly, 34, LV_OPA_COVER);
+
+    drawLineSegment(layer, cat_x + 26, cat_y + 118, cat_x + 76, cat_y + 95, fur, 20);
+    drawRoundRect(layer, cat_x + 60, cat_y + 84, cat_x + 90, cat_y + 109, paw, 14, LV_OPA_COVER);
+
+    drawRoundRect(layer, cat_x + 118, cat_y + 141, cat_x + 215, cat_y + 219, guitar, 39, LV_OPA_COVER);
+    drawRoundRect(layer, cat_x + 100, cat_y + 121, cat_x + 159, cat_y + 188, guitar, 34, LV_OPA_COVER);
+    drawRoundRect(layer, cat_x + 114, cat_y + 136, cat_x + 144, cat_y + 166, 0x8a4a1f, 16, LV_OPA_COVER);
+    drawRoundRect(layer, cat_x + 124, cat_y + 148, cat_x + 217, cat_y + 219, guitar_dark, 36, LV_OPA_40);
+    drawLineSegment(layer, cat_x + 36, cat_y + 108, cat_x + 133, cat_y + 149, guitar, 25);
+    drawLineSegment(layer, cat_x + 34, cat_y + 103, cat_x + 130, cat_y + 144, guitar_light, 18);
+    drawRoundRect(layer, cat_x + 30, cat_y + 96, cat_x + 52, cat_y + 124, guitar_light, 10, LV_OPA_COVER);
+    drawLineSegment(layer, cat_x + 45, cat_y + 109, cat_x + 151, cat_y + 168, string, 2);
+    drawLineSegment(layer, cat_x + 44, cat_y + 116, cat_x + 150, cat_y + 175, string, 2);
+    drawLineSegment(layer, cat_x + 43, cat_y + 123, cat_x + 149, cat_y + 182, string, 2);
+    drawLineSegment(layer, cat_x + 186, cat_y + 176, cat_x + 205, cat_y + 144, guitar_dark, 7);
+
+    drawLineSegment(layer, cat_x + 132, cat_y + 122, cat_x + 154, cat_y + 167 + strum / 2, paw, 15);
+    drawRoundRect(layer, cat_x + 146, cat_y + 160 + strum / 2, cat_x + 165, cat_y + 181 + strum / 2, paw, 10, LV_OPA_COVER);
+
+    drawCatHead(layer, cat_x + 21, cat_y + 0, frame, running);
+
+    drawRoundRect(layer, x + 66, y + 194, x + 115, y + 228, 0xf4f6f8, 2, LV_OPA_COVER);
+    drawLineSegment(layer, x + 66, y + 194, x + 115, y + 194, 0x999999, 1);
+    lv_draw_label_dsc_t label;
+    lv_draw_label_dsc_init(&label);
+    label.color = lv_color_hex(0x333333);
+    label.font = &lv_font_montserrat_20;
+    label.align = LV_TEXT_ALIGN_CENTER;
+    label.text = "吉他";
+    lv_area_t label_area = {.x1 = x + 66, .y1 = y + 199, .x2 = x + 115, .y2 = y + 224};
+    lv_draw_label(layer, &label, &label_area);
 }
 
 void drawBallRunner(lv_layer_t *layer, int x, int y, int frame, bool running)
 {
-    const uint32_t body = 0x9f88ed;
-    const uint32_t body_dark = 0x7e6ccc;
-    const uint32_t foot = 0x4d3f82;
-    const uint32_t ink = 0x221b35;
-    const uint32_t white = 0xffffff;
-    const uint32_t ball = 0xf4a629;
+    const uint32_t fur = 0x222733;
+    const uint32_t fur_light = 0xb7bdcc;
+    const uint32_t belly = 0xd8dde8;
+    const uint32_t paw = 0x141820;
+    const uint32_t ball = 0xf3c545;
     const uint32_t ball_line = 0xa65d15;
     const uint32_t floor_line = 0xaeb4bf;
     const uint32_t shadow = 0xb7b7b7;
@@ -361,13 +448,12 @@ void drawBallRunner(lv_layer_t *layer, int x, int y, int frame, bool running)
     int bounce = running ? (int)(sinf(frame * 0.44f) * 4.0f) : 0;
     int lean = running ? (int)(sinf(frame * 0.38f) * 3.0f) : 0;
     int step = running ? (int)(sinf(frame * 1.36f) * 7.0f) : 0;
-    int eye_shift = running ? (int)(sinf(frame * 0.28f) * 2.0f) : 0;
 
     int floor_y = y + 205;
-    int ball_x = x + 70;
-    int ball_y = y + 118;
-    int body_x = x + 57 + lean;
-    int body_y = y + 30 - bounce;
+    int ball_x = x + 77;
+    int ball_y = y + 123;
+    int body_x = x + 43 + lean;
+    int body_y = y + 25 - bounce;
 
     drawLineSegment(layer, 0, floor_y, CANVAS_WIDTH - 1, floor_y, floor_line, 2);
     drawRoundRect(layer, x + 91, y + 216, x + 150, y + 224, shadow, 24, LV_OPA_60);
@@ -377,29 +463,31 @@ void drawBallRunner(lv_layer_t *layer, int x, int y, int frame, bool running)
     drawLineSegment(layer, ball_x + 8 + (roll % 18) / 4, ball_y + 63, ball_x + 87 - (roll % 18) / 6, ball_y + 47, ball_line, 4);
     drawLineSegment(layer, ball_x + 34 - (roll % 18) / 2, ball_y + 4, ball_x + 58 + (roll % 18) / 3, ball_y + 92, ball_line, 4);
 
-    drawLineSegment(layer, body_x + 47, body_y + 115, ball_x + 34 + step, ball_y + 21, foot, 10);
-    drawLineSegment(layer, body_x + 85, body_y + 114, ball_x + 65 - step, ball_y + 19, foot, 10);
-    drawRoundRect(layer, ball_x + 23 + step, ball_y + 11, ball_x + 47 + step, ball_y + 28, foot, 10, LV_OPA_COVER);
-    drawRoundRect(layer, ball_x + 54 - step, ball_y + 10, ball_x + 78 - step, ball_y + 27, foot, 10, LV_OPA_COVER);
+    drawLineSegment(layer, body_x + 59, body_y + 144, ball_x + 30 + step, ball_y + 17, paw, 11);
+    drawLineSegment(layer, body_x + 98, body_y + 142, ball_x + 66 - step, ball_y + 16, paw, 11);
+    drawRoundRect(layer, ball_x + 17 + step, ball_y + 7, ball_x + 44 + step, ball_y + 26, paw, 10, LV_OPA_COVER);
+    drawRoundRect(layer, ball_x + 55 - step, ball_y + 6, ball_x + 82 - step, ball_y + 25, paw, 10, LV_OPA_COVER);
 
-    drawRoundRect(layer, body_x, body_y, body_x + 116, body_y + 116, body, 60, LV_OPA_COVER);
-    drawRoundRect(layer, body_x + 5, body_y + 82, body_x + 72, body_y + 116, body_dark, 42, LV_OPA_30);
+    drawLineSegment(layer, body_x + 19, body_y + 119, body_x - 8, body_y + 150, fur, 28);
+    drawRoundRect(layer, body_x - 13, body_y + 135, body_x + 39, body_y + 182, fur, 25, LV_OPA_COVER);
+    drawLineSegment(layer, body_x + 29, body_y + 128, body_x + 1, body_y + 148, fur_light, 5);
 
-    drawRoundRect(layer, body_x + 61, body_y + 35, body_x + 94, body_y + 73, white, 20, LV_OPA_COVER);
-    drawRoundRect(layer, body_x + 92, body_y + 30, body_x + 124, body_y + 67, white, 19, LV_OPA_COVER);
-    drawRoundRect(layer, body_x + 77 + eye_shift, body_y + 43, body_x + 93 + eye_shift, body_y + 66, 0x000000, 10, LV_OPA_COVER);
-    drawRoundRect(layer, body_x + 107 + eye_shift, body_y + 38, body_x + 123 + eye_shift, body_y + 61, 0x000000, 10, LV_OPA_COVER);
+    drawRoundRect(layer, body_x + 36, body_y + 76, body_x + 148, body_y + 176, fur, 56, LV_OPA_COVER);
+    drawRoundRect(layer, body_x + 72, body_y + 115, body_x + 136, body_y + 174, belly, 33, LV_OPA_COVER);
+    drawLineSegment(layer, body_x + 50, body_y + 112, body_x + 16, body_y + 144, fur, 18);
+    drawRoundRect(layer, body_x + 6, body_y + 137, body_x + 27, body_y + 158, paw, 10, LV_OPA_COVER);
+    drawLineSegment(layer, body_x + 137, body_y + 112, body_x + 167, body_y + 142, fur, 18);
+    drawRoundRect(layer, body_x + 158, body_y + 136, body_x + 180, body_y + 158, paw, 10, LV_OPA_COVER);
 
-    drawLineSegment(layer, body_x + 83, body_y + 82, body_x + 88, body_y + 92, ink, 3);
-    drawLineSegment(layer, body_x + 88, body_y + 92, body_x + 94, body_y + 94, ink, 3);
-    drawLineSegment(layer, body_x + 94, body_y + 94, body_x + 101, body_y + 87, ink, 3);
+    drawCatHead(layer, body_x + 19, body_y - 12, frame, running);
 }
 
 void drawPatternDots(lv_layer_t *layer, int selected)
 {
+    int start_x = 97;
     for (int i = 0; i < PET_PATTERN_COUNT; ++i) {
         uint32_t color = i == selected ? 0x111111 : 0xc8ccd3;
-        int x = 106 + i * 18;
+        int x = start_x + i * 18;
         drawRoundRect(layer, x, 231, x + 8, 239, color, 4, LV_OPA_COVER);
     }
 }
@@ -422,7 +510,7 @@ CodexPetApp::CodexPetApp(bool use_status_bar, bool use_navigation_bar):
     App(APP_NAME, nullptr, true, use_status_bar, use_navigation_bar),
     _draw_buf(nullptr),
     _canvas(nullptr),
-    _pattern_index(PET_PATTERN_GUITAR)
+    _pattern_index(PET_PATTERN_PURPLE)
 {
 }
 
@@ -552,12 +640,15 @@ void CodexPetApp::drawFrame(void)
 
     lv_layer_t layer;
     lv_canvas_init_layer(_canvas, &layer);
-    lv_canvas_fill_bg(_canvas, lv_color_hex(SCREEN_BG_COLOR), LV_OPA_COVER);
+    uint32_t bg = _pattern_index == PET_PATTERN_PURPLE ? SCREEN_BG_COLOR : 0xdfe8f8;
+    lv_canvas_fill_bg(_canvas, lv_color_hex(bg), LV_OPA_COVER);
 
     if (_pattern_index == PET_PATTERN_BALL) {
         drawBallRunner(&layer, cat_x, 14 + bob, frame, running);
+    } else if (_pattern_index == PET_PATTERN_GUITAR) {
+        drawCatGuitar(&layer, cat_x, 5 + bob, frame, running);
     } else {
-        drawGuitarPet(&layer, cat_x, 16 + bob, frame, running);
+        drawPurplePet(&layer, cat_x, 16 + bob, frame, running);
     }
     drawPatternDots(&layer, _pattern_index);
 
